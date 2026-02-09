@@ -1,8 +1,7 @@
-import google.genai as genai
+from openai import OpenAI
 import json
 import os
 import traceback
-import google.auth
 
 def extract_shifts_with_ai(pdf_text_content):
     """
@@ -10,9 +9,9 @@ def extract_shifts_with_ai(pdf_text_content):
     Returns a tuple: (list_of_shifts, error_message)
     """
     # Get the API key from the environment
-    api_key = os.environ.get("GOOGLE_API_KEY")
+    api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        return None, "GOOGLE_API_KEY is not set in the environment."
+        return None, "OPENAI_API_KEY is not set in the environment."
 
     prompt = f"""
     You are a data extraction assistant. 
@@ -25,32 +24,37 @@ def extract_shifts_with_ai(pdf_text_content):
     "end_time" (HH:MM in 24h format), 
     "title" (e.g., "Work Shift").
     
-    If you cannot find any shifts in the text, return an empty JSON array: [].
+    Return the result as a JSON object with a single key "shifts" containing the array.
+    Example: {{ "shifts": [ ... ] }}
+    
     If a shift goes past midnight, split it or handle it logically, but ensure the date is correct.
-    Do not include markdown formatting like ```json. Just the raw JSON string.
 
     PDF CONTENT:
     {pdf_text_content}
     """
 
     try:
-        # --- Diagnostic Logging ---
-        # Print library versions to confirm what is running inside the container.
-        print("\n--- AI Processor Diagnostics ---")
-        print(f"Path to genai module: {genai.__file__}")
-        print(f"google-genai version: {getattr(genai, '__version__', 'N/A')}")
-        print(f"google-auth version: {getattr(google.auth, '__version__', 'N/A')}")
-        print("------------------------------\n")
-
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
-        response = model.generate_content(prompt)
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"}
+        )
         
         # Clean up response to ensure it's pure JSON
-        cleaned_text = response.text.replace("```json", "").replace("```", "").strip()
+        cleaned_text = response.choices[0].message.content
         shifts = json.loads(cleaned_text)
+        
+        # Handle the wrapper key
+        if isinstance(shifts, dict) and "shifts" in shifts:
+            shifts = shifts["shifts"]
+            
         return shifts, None
     except json.JSONDecodeError as e:
-        error_message = f"AI returned invalid JSON. Error: {e}. AI Response: '{response.text[:200]}...'"
+        error_message = f"AI returned invalid JSON. Error: {e}."
         print(f"JSONDecodeError: {error_message}")
         return None, error_message
     except Exception as e:

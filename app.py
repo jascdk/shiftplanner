@@ -19,12 +19,12 @@ with st.sidebar:
     
     # AI Config
     # Pre-fill from environment variable if it exists, but allow user to override.
-    env_api_key = os.environ.get("GOOGLE_API_KEY", "")
-    api_key = st.text_input("Gemini API Key", type="password", value=env_api_key)
+    env_api_key = os.environ.get("OPENAI_API_KEY", "")
+    api_key = st.text_input("OpenAI API Key", type="password", value=env_api_key)
 
     # Ensure the environment variable is set for the backend functions for this session.
     if api_key:
-        os.environ["GOOGLE_API_KEY"] = api_key
+        os.environ["OPENAI_API_KEY"] = api_key
         
     st.divider()
     
@@ -88,7 +88,7 @@ with col1:
                     else:
                         st.warning("Analysis complete, but no shifts were found in the PDF.")
     elif not api_key:
-        st.warning("Please enter your Gemini API Key in the sidebar.")
+        st.warning("Please enter your OpenAI API Key in the sidebar.")
 
 with col2:
     st.subheader("2. Review & Sync")

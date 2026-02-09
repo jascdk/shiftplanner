@@ -1,7 +1,7 @@
 streamlit
 pandas
 pypdf
-google-genai
+openai
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
