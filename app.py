@@ -18,7 +18,11 @@ with st.sidebar:
     st.header("Configuration")
     
     # AI Config
-    api_key = st.text_input("Gemini API Key", type="password")
+    # Pre-fill from environment variable if it exists, but allow user to override.
+    env_api_key = os.environ.get("GOOGLE_API_KEY", "")
+    api_key = st.text_input("Gemini API Key", type="password", value=env_api_key)
+
+    # Ensure the environment variable is set for the backend functions for this session.
     if api_key:
         os.environ["GOOGLE_API_KEY"] = api_key
         
