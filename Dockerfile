@@ -9,7 +9,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # --- Verification Step ---
 # Print the installed version of the library to the build logs for debugging.
-RUN pip show google-generativeai
+RUN echo "Verifying google-generativeai installation..." && \
+    python -c "import google.generativeai as genai; print(f'google-generativeai version: {genai.__version__}')"
 
 # Copy the rest of the application
 COPY . .
