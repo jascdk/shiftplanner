@@ -36,12 +36,14 @@ def extract_shifts_with_ai(pdf_text_content):
     try:
         # --- Diagnostic Logging ---
         # Print library versions to confirm what is running inside the container.
-        print("--- AI Processor Diagnostics ---")
-        print(f"google-genai version: {genai.__version__}")
-        print(f"google-auth version: {google.auth.__version__}")
-        print("-----------------------------")
+        print("\n--- AI Processor Diagnostics ---")
+        print(f"Path to genai module: {genai.__file__}")
+        print(f"google-genai version: {getattr(genai, '__version__', 'N/A')}")
+        print(f"google-auth version: {getattr(google.auth, '__version__', 'N/A')}")
+        print("------------------------------\n")
 
-        # Use the standard GenerativeModel interface with the 'latest' tag.
+        # Configure the API key and create the model.
+        genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
         
