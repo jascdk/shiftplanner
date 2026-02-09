@@ -7,8 +7,9 @@ def extract_shifts_with_ai(pdf_text_content):
     Sends raw PDF text to Gemini and asks for a JSON response.
     Returns a tuple: (list_of_shifts, error_message)
     """
-    # Ensure API key is set in environment
-    if not os.environ.get("GOOGLE_API_KEY"):
+    # Get the API key from the environment
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
         return None, "GOOGLE_API_KEY is not set in the environment."
 
     prompt = f"""
@@ -31,11 +32,12 @@ def extract_shifts_with_ai(pdf_text_content):
     """
 
     try:
-        client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
-        response = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=prompt
-        )
+        # Best practice: Configure the library before use.
+        genai.configure(api_key=api_key)
+
+        # Use the standard GenerativeModel interface with the 'latest' tag.
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        response = model.generate_content(prompt)
         
         # Clean up response to ensure it's pure JSON
         cleaned_text = response.text.replace("```json", "").replace("```", "").strip()
