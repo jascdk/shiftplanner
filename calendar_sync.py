@@ -15,6 +15,9 @@ def get_calendar_service():
     """
     creds = None
     if os.path.exists("token.json"):
+        # Add a check to ensure the path is not a directory, which can happen with Docker volumes.
+        if os.path.isdir("token.json"):
+            raise IsADirectoryError("[Errno 21] The path 'token.json' is a directory, but it should be a file. Please remove the directory on your host machine, generate the token locally, and restart the container.")
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
     
     if not creds or not creds.valid:
