@@ -1,0 +1,41 @@
+import google.generativeai as genai
+import json
+import os
+
+def extract_shifts_with_ai(pdf_text_content):
+    """
+    Sends raw PDF text to Gemini and asks for a JSON response.
+    """
+    # Ensure API key is set in environment
+    if not os.environ.get("GOOGLE_API_KEY"):
+        return []
+
+    prompt = f"""
+    You are a data extraction assistant. 
+    Below is the text from a work shift PDF. 
+    Extract all work shifts. 
+    
+    Return ONLY a valid JSON array of objects with these exact keys: 
+    "date" (YYYY-MM-DD), 
+    "start_time" (HH:MM in 24h format), 
+    "end_time" (HH:MM in 24h format), 
+    "title" (e.g., "Work Shift").
+    
+    If a shift goes past midnight, split it or handle it logically, but ensure the date is correct.
+    Do not include markdown formatting like ```json. Just the raw JSON string.
+
+    PDF CONTENT:
+    {pdf_text_content}
+    """
+
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)
+        
+        # Clean up response to ensure it's pure JSON
+        cleaned_text = response.text.replace("```json", "").replace("```", "").strip()
+        shifts = json.loads(cleaned_text)
+        return shifts
+    except Exception as e:
+        print(f"Error parsing AI response: {e}")
+        return []
