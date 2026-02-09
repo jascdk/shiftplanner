@@ -77,13 +77,16 @@ with col1:
                     uploaded_file.seek(0)
                     
                 raw_text = extract_text_from_pdf(uploaded_file)
-                shifts_data = extract_shifts_with_ai(raw_text)
+                shifts_data, error_message = extract_shifts_with_ai(raw_text)
                 
-                if shifts_data:
+                if error_message:
+                    st.error(f"Analysis Failed: {error_message}")
+                elif shifts_data is not None:
                     st.session_state['shifts'] = shifts_data
-                    st.success(f"Extracted {len(shifts_data)} shifts.")
-                else:
-                    st.error("AI could not find shifts. Please check the PDF.")
+                    if shifts_data:
+                        st.success(f"Extracted {len(shifts_data)} shifts.")
+                    else:
+                        st.warning("Analysis complete, but no shifts were found in the PDF.")
     elif not api_key:
         st.warning("Please enter your Gemini API Key in the sidebar.")
 

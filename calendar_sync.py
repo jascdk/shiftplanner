@@ -46,16 +46,19 @@ def sync_shifts_to_calendar(shifts_df):
             start_dt = f"{row['date']}T{row['start_time']}:00"
             end_dt = f"{row['date']}T{row['end_time']}:00"
 
+            # Get timezone from environment variable, default to UTC if not set.
+            timezone = os.environ.get('TIMEZONE', 'UTC')
+
             event = {
                 'summary': row.get('title', 'Work Shift'),
                 'description': 'Uploaded via ShiftPlanner',
                 'start': {
                     'dateTime': start_dt,
-                    'timeZone': 'Europe/Berlin', # Update this to your timezone
+                    'timeZone': timezone,
                 },
                 'end': {
                     'dateTime': end_dt,
-                    'timeZone': 'Europe/Berlin', # Update this to your timezone
+                    'timeZone': timezone,
                 },
             }
 
