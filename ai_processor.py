@@ -42,8 +42,6 @@ def extract_shifts_with_ai(pdf_text_content):
         print(f"google-auth version: {getattr(google.auth, '__version__', 'N/A')}")
         print("------------------------------\n")
 
-        # Configure the API key and create the model.
-        genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
         
