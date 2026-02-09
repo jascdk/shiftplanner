@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import io
 
 # Import custom logic
 from logic.pdf_parser import extract_text_from_pdf
@@ -54,10 +55,15 @@ with col1:
     
     # Option B: File from Email
     if 'uploaded_file_path' in st.session_state:
-        st.info(f"Using file from email: {os.path.basename(st.session_state['uploaded_file_path'])}")
-        # If manual upload is empty, use the email file
-        if not uploaded_file:
-            uploaded_file = open(st.session_state['uploaded_file_path'], 'rb')
+        email_file_path = st.session_state['uploaded_file_path']
+        if os.path.exists(email_file_path):
+            st.info(f"Using file from email: {os.path.basename(email_file_path)}")
+            # If manual upload is empty, use the email file
+            if not uploaded_file:
+                # Read the file into an in-memory buffer to avoid resource leaks
+                # across Streamlit reruns.
+                with open(email_file_path, "rb") as f:
+                    uploaded_file = io.BytesIO(f.read())
 
     if uploaded_file and api_key:
         if st.button("Analyze Roster", type="primary"):

@@ -1,6 +1,7 @@
 import imaplib
 import email
 import os
+import re
 from email.header import decode_header
 
 def fetch_pdf_from_email(imap_server, email_user, email_pass, subject_filter="Shift"):
@@ -10,16 +11,20 @@ def fetch_pdf_from_email(imap_server, email_user, email_pass, subject_filter="Sh
     """
     save_folder = "temp_downloads"
     os.makedirs(save_folder, exist_ok=True)
+    mail = None  # Initialize mail to None
     
     try:
         # Connect to the server
         mail = imaplib.IMAP4_SSL(imap_server)
         mail.login(email_user, email_pass)
         mail.select("inbox")
-
-        # Search for emails (Subject filter)
-        status, messages = mail.search(None, 'ALL')
         
+        # Search for emails (Subject filter)
+        # Using a server-side search is more efficient.
+        status, messages = mail.search(None, f'(SUBJECT "{subject_filter}")')
+        if status != "OK" or not messages[0]: # If search fails or is empty, try a broader search.
+            status, messages = mail.search(None, 'ALL')
+            
         if status != "OK":
             return None, "No emails found."
 
@@ -37,7 +42,7 @@ def fetch_pdf_from_email(imap_server, email_user, email_pass, subject_filter="Sh
                     if isinstance(subject, bytes):
                         subject = subject.decode(encoding if encoding else "utf-8")
                     
-                    # Filter
+                    # Manual filter if the server-side search was too broad
                     if subject_filter.lower() not in subject.lower():
                         continue 
 
@@ -49,18 +54,24 @@ def fetch_pdf_from_email(imap_server, email_user, email_pass, subject_filter="Sh
                             if "attachment" in content_disposition:
                                 filename = part.get_filename()
                                 if filename and filename.lower().endswith(".pdf"):
-                                    filepath = os.path.join(save_folder, filename)
+                                    # Sanitize filename to prevent path traversal issues
+                                    safe_filename = re.sub(r'[^a-zA-Z0-9._-]', '', os.path.basename(filename))
+                                    if not safe_filename:
+                                        safe_filename = "downloaded_roster.pdf"
+
+                                    filepath = os.path.join(save_folder, safe_filename)
                                     
                                     with open(filepath, "wb") as f:
                                         f.write(part.get_payload(decode=True))
                                     
-                                    mail.close()
-                                    mail.logout()
-                                    return filepath, f"Downloaded: {filename} from '{subject}'"
+                                    return filepath, f"Downloaded: {safe_filename} from '{subject}'"
         
-        mail.close()
-        mail.logout()
-        return None, "No PDF attachment found in recent emails."
+        return None, "No PDF attachment found in recent emails matching the criteria."
 
     except Exception as e:
         return None, f"IMAP Error: {e}"
+    finally:
+        # Ensure we always try to log out and close the connection
+        if mail and mail.state == 'SELECTED':
+            mail.close()
+            mail.logout()
