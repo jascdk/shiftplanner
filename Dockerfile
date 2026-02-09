@@ -9,12 +9,12 @@ COPY requirements.txt .
 # --- Force Clean Installation ---
 # Upgrade pip, uninstall any old version of the library to break caches, then install fresh.
 RUN python -m pip install --upgrade pip && \
-    pip uninstall -y google-generativeai || true && \
+    pip uninstall -y google-generativeai google-genai || true && \
     pip install --no-cache-dir -r requirements.txt
 
 # --- Verification Step ---
 # Print the installed version of the library to the build logs for debugging.
-RUN echo "Verifying google-generativeai installation..." && \
+RUN echo "Verifying google-genai installation..." && \
     python -c "import google.generativeai as genai; print(f'google-generativeai version: {genai.__version__}')"
 # Copy the rest of the application
 COPY . .
