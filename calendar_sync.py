@@ -39,6 +39,7 @@ def get_calendar_service():
 def sync_shifts_to_calendar(shifts_df):
     service = get_calendar_service()
     created_events = 0
+    created_event_ids = []
     errors = []
 
     for index, row in shifts_df.iterrows():
@@ -68,10 +69,28 @@ def sync_shifts_to_calendar(shifts_df):
                 },
             }
 
-            service.events().insert(calendarId='primary', body=event).execute()
+            event_result = service.events().insert(calendarId='primary', body=event).execute()
+            created_event_ids.append(event_result['id'])
             created_events += 1
             
         except Exception as e:
             errors.append(f"Failed to add {row['date']}: {str(e)}")
 
-    return created_events, errors
+    return created_events, created_event_ids, errors
+
+def delete_events_from_calendar(event_ids):
+    """
+    Deletes a list of events by ID from the primary calendar.
+    """
+    service = get_calendar_service()
+    deleted_count = 0
+    errors = []
+
+    for event_id in event_ids:
+        try:
+            service.events().delete(calendarId='primary', eventId=event_id).execute()
+            deleted_count += 1
+        except Exception as e:
+            errors.append(f"Failed to delete event {event_id}: {str(e)}")
+            
+    return deleted_count, errors

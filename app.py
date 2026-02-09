@@ -6,7 +6,7 @@ import io
 # Import custom logic
 from pdf_parser import extract_text_from_pdf
 from ai_processor import extract_shifts_with_ai
-from calendar_sync import sync_shifts_to_calendar
+from calendar_sync import sync_shifts_to_calendar, delete_events_from_calendar
 from email_fetcher import fetch_pdf_from_email
 
 st.set_page_config(page_title="ShiftPlanner", page_icon="📅", layout="wide")
@@ -108,11 +108,13 @@ with col2:
             else:
                 with st.spinner("Syncing..."):
                     try:
-                        count, errors = sync_shifts_to_calendar(edited_df)
+                        count, event_ids, errors = sync_shifts_to_calendar(edited_df)
                         
                         if count > 0:
                             st.balloons()
                             st.success(f"Successfully added {count} events!")
+                            # Store IDs in session state so we can undo later
+                            st.session_state['last_synced_event_ids'] = event_ids
                         
                         if errors:
                             st.error(f"Encountered {len(errors)} errors.")
@@ -120,3 +122,15 @@ with col2:
                                 st.write(errors)
                     except Exception as e:
                         st.error(f"Sync failed: {e}")
+
+        # Undo Button
+        if 'last_synced_event_ids' in st.session_state and st.session_state['last_synced_event_ids']:
+            st.warning("Need to undo?")
+            if st.button("🗑️ Delete Last Synced Events"):
+                with st.spinner("Deleting events..."):
+                    del_count, del_errors = delete_events_from_calendar(st.session_state['last_synced_event_ids'])
+                    st.success(f"Deleted {del_count} events.")
+                    if del_errors:
+                        st.error(f"Failed to delete some events: {del_errors}")
+                    # Clear the state so button disappears
+                    del st.session_state['last_synced_event_ids']
