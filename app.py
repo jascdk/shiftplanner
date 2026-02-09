@@ -4,10 +4,10 @@ import os
 import io
 
 # Import custom logic
-from logic.pdf_parser import extract_text_from_pdf
-from logic.ai_processor import extract_shifts_with_ai
-from logic.calendar_sync import sync_shifts_to_calendar
-from logic.email_fetcher import fetch_pdf_from_email
+from pdf_parser import extract_text_from_pdf
+from ai_processor import extract_shifts_with_ai
+from calendar_sync import sync_shifts_to_calendar
+from email_fetcher import fetch_pdf_from_email
 
 st.set_page_config(page_title="ShiftPlanner", page_icon="📅", layout="wide")
 
