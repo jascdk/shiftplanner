@@ -12,11 +12,6 @@ services:
       # The path on the left is relative to this docker-compose.yml file.
       - ./credentials.json:/app/credentials.json:ro
       - ./token.json:/app/token.json
-    environment:
-      # Set your API key here to avoid typing it in the GUI.
-      # Replace "your_gemini_api_key_here" with your actual key.
-      - GOOGLE_API_KEY=your_gemini_api_key_here
-      # Sets the container's system time.
-      - TZ=Europe/Berlin
-      # Sets the timezone for Google Calendar events.
-      - TIMEZONE=Europe/Berlin
+    env_file:
+      # Load environment variables from a file named .env
+      - .env
