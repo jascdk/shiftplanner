@@ -45,9 +45,11 @@ def extract_shifts_with_ai(pdf_text_content):
         return shifts, None
     except json.JSONDecodeError as e:
         error_message = f"AI returned invalid JSON. Error: {e}. AI Response: '{response.text[:200]}...'"
-        print(error_message)
+        print(f"JSONDecodeError: {error_message}")
         return None, error_message
     except Exception as e:
         error_message = f"An unexpected error occurred with the AI service: {e}"
+        # Log the full exception, including traceback.
+        print(f"Exception: {error_message}")
         print(error_message)
         return None, error_message
