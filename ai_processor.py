@@ -31,7 +31,7 @@ def extract_shifts_with_ai(pdf_text_content):
     """
 
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
         
         # Clean up response to ensure it's pure JSON
