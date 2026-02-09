@@ -1,4 +1,4 @@
-from openai import OpenAI
+import openai
 import json
 import os
 import traceback
@@ -34,7 +34,7 @@ def extract_shifts_with_ai(pdf_text_content):
     """
 
     try:
-        client = OpenAI(api_key=api_key)
+        client = openai.OpenAI(api_key=api_key)
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -56,6 +56,10 @@ def extract_shifts_with_ai(pdf_text_content):
     except json.JSONDecodeError as e:
         error_message = f"AI returned invalid JSON. Error: {e}."
         print(f"JSONDecodeError: {error_message}")
+        return None, error_message
+    except openai.RateLimitError as e:
+        error_message = "OpenAI API quota exceeded. Please check your plan and billing details on the OpenAI website."
+        print(f"RateLimitError: {e}")
         return None, error_message
     except Exception as e:
         error_message = f"An unexpected error occurred with the AI service. See container logs for full traceback."
