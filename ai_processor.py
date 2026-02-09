@@ -1,6 +1,8 @@
 import google.genai as genai
 import json
 import os
+import traceback
+import google.auth
 
 def extract_shifts_with_ai(pdf_text_content):
     """
@@ -32,6 +34,13 @@ def extract_shifts_with_ai(pdf_text_content):
     """
 
     try:
+        # --- Diagnostic Logging ---
+        # Print library versions to confirm what is running inside the container.
+        print("--- AI Processor Diagnostics ---")
+        print(f"google-genai version: {genai.__version__}")
+        print(f"google-auth version: {google.auth.__version__}")
+        print("-----------------------------")
+
         # Best practice: Configure the library before use.
         genai.configure(api_key=api_key)
 
@@ -48,8 +57,9 @@ def extract_shifts_with_ai(pdf_text_content):
         print(f"JSONDecodeError: {error_message}")
         return None, error_message
     except Exception as e:
-        error_message = f"An unexpected error occurred with the AI service: {e}"
+        error_message = f"An unexpected error occurred with the AI service. See container logs for full traceback."
         # Log the full exception, including traceback.
-        print(f"Exception: {error_message}")
-        print(error_message)
+        print("--- Full Exception Traceback ---")
+        traceback.print_exc()
+        print("--------------------------------")
         return None, error_message
