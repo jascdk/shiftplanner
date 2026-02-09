@@ -7,6 +7,10 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# --- Verification Step ---
+# Print the installed version of the library to the build logs for debugging.
+RUN pip show google-generativeai
+
 # Copy the rest of the application
 COPY . .
 
