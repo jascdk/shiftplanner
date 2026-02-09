@@ -41,9 +41,6 @@ def extract_shifts_with_ai(pdf_text_content):
         print(f"google-auth version: {google.auth.__version__}")
         print("-----------------------------")
 
-        # Best practice: Configure the library before use.
-        genai.configure(api_key=api_key)
-
         # Use the standard GenerativeModel interface with the 'latest' tag.
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
