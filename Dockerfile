@@ -15,7 +15,7 @@ RUN python -m pip install --upgrade pip && \
 # --- Verification Step ---
 # Print the installed version of the library to the build logs for debugging.
 RUN echo "Verifying google-genai installation..." && \
-    python -c "import google.generativeai as genai; print(f'google-generativeai version: {genai.__version__}')"
+    python -c "import google.genai as genai; print(f'google-genai version: {genai.__version__}')"
 # Copy the rest of the application
 COPY . .
 
