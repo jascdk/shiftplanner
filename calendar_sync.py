@@ -49,9 +49,15 @@ def sync_shifts_to_calendar(shifts_df):
             # Get timezone from environment variable, default to UTC if not set.
             timezone = os.environ.get('TIMEZONE', 'UTC')
 
+            # Handle description (check for NaN/None which pandas might produce)
+            desc_val = row.get('description')
+            if desc_val is None or str(desc_val).lower() == 'nan':
+                desc_val = ""
+            full_desc = f"{desc_val}\n\nUploaded via ShiftPlanner" if desc_val else "Uploaded via ShiftPlanner"
+
             event = {
                 'summary': row.get('title', 'Work Shift'),
-                'description': 'Uploaded via ShiftPlanner',
+                'description': full_desc,
                 'start': {
                     'dateTime': start_dt,
                     'timeZone': timezone,

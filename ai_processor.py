@@ -22,7 +22,8 @@ def extract_shifts_with_ai(pdf_text_content):
     "date" (YYYY-MM-DD), 
     "start_time" (HH:MM in 24h format), 
     "end_time" (HH:MM in 24h format), 
-    "title" (e.g., "Work Shift").
+    "title" (e.g., "Work Shift"),
+    "description" (Details about the shift activity, location, or role).
     
     Return the result as a JSON object with a single key "shifts" containing the array.
     Example: {{ "shifts": [ ... ] }}
